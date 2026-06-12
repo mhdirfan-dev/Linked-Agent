@@ -1,0 +1,799 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>LinkedAgent — AI LinkedIn Post Intelligence</title>
+  <meta name="description" content="LinkedAgent: AI-powered LinkedIn post optimizer with trending radar, schedule planner, carousel export, and Foundry IQ dynamic rules." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+  <!-- On local dev: config.js (gitignored) provides the key.
+       On Vercel:    /api/env serverless function injects it from environment variables. -->
+  <script>window.__ENV__ = window.__ENV__ || {};</script>
+  <script src="./config.js" onerror="void 0"></script>
+  <script src="/api/env" onerror="void 0"></script>
+</head>
+<body>
+
+  <!-- ── ANIMATED BACKGROUND ────────────────────────────── -->
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div>
+    <div class="orb orb-2"></div>
+    <div class="orb orb-3"></div>
+    <div class="orb orb-4"></div>
+    <div class="orb orb-5"></div>
+  </div>
+  <canvas class="bg-particles" id="bgParticles" aria-hidden="true"></canvas>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <!-- ── NAVBAR ──────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="9" height="9" rx="2" fill="currentColor" opacity="0.9"/>
+            <rect x="13" y="2" width="9" height="9" rx="2" fill="currentColor" opacity="0.5"/>
+            <rect x="2" y="13" width="9" height="9" rx="2" fill="currentColor" opacity="0.5"/>
+            <rect x="13" y="13" width="9" height="9" rx="2" fill="currentColor" opacity="0.9"/>
+          </svg>
+        </div>
+        <span class="nav-name">Linked<span class="nav-accent">Agent</span></span>
+      </div>
+      <div class="nav-badges">
+        <span class="nav-badge foundry">⚡ Foundry IQ</span>
+        <span class="nav-badge groq">🧠 GROQ LLaMA 3.3</span>
+        <span class="nav-badge hackathon">🏆 Agents League 2026</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── HERO ────────────────────────────────────────────── -->
+  <header class="hero">
+    <div class="hero-inner">
+      <div class="hero-eyebrow">
+        <span class="eyebrow-dot"></span>
+        AI Reasoning Agent · Microsoft Foundry IQ · GROQ
+      </div>
+      <h1 class="hero-title">
+        Turn rough notes into<br/>
+        <span class="gradient-text">LinkedIn posts that trend</span>
+      </h1>
+      <p class="hero-sub">
+        LinkedAgent analyzes your draft with multi-step AI reasoning, applies the LinkedIn algorithm rulebook,
+        and generates two post variants — complete with schedule, hashtags, @mentions, checklist, and carousel export.
+      </p>
+      <div class="hero-stats">
+        <div class="hero-stat"><span class="hero-stat-num">10</span><span class="hero-stat-label">Reasoning Steps</span></div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat"><span class="hero-stat-num">2</span><span class="hero-stat-label">Post Variants</span></div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat"><span class="hero-stat-num">8</span><span class="hero-stat-label">Trending Topics</span></div>
+        <div class="hero-stat-divider"></div>
+        <div class="hero-stat"><span class="hero-stat-num">5</span><span class="hero-stat-label">Audience Types</span></div>
+      </div>
+    </div>
+  </header>
+
+  <main>
+
+    <!-- ── INPUT CARD ───────────────────────────────────── -->
+    <section class="card input-card" id="inputSection">
+      <div class="card-header">
+        <div class="card-icon blue">✍️</div>
+        <div>
+          <h2 class="card-title">Your Raw Draft</h2>
+          <p class="card-sub">Paste anything — notes, bullet points, markdown tables, raw ideas</p>
+        </div>
+      </div>
+
+      <div class="field">
+        <label for="draft">Draft / Notes</label>
+        <textarea id="draft" placeholder="e.g. I built a full-stack expense tracker using MERN stack in 3 days. Added EasyOCR for receipt scanning. Deployed on Vercel. Got 200 users on day one.
+
+Try pasting a markdown table or list with 5+ items — LinkedAgent will auto-detect and generate a PDF carousel!"></textarea>
+        <div class="char-counter" id="charCounter">0 characters</div>
+      </div>
+
+      <div class="two-col">
+        <div class="field">
+          <label for="audience">Target Audience</label>
+          <select id="audience">
+            <option value="developers">🧑‍💻 Developers &amp; Engineers</option>
+            <option value="recruiters">👔 Recruiters &amp; Hiring Managers</option>
+            <option value="founders">🚀 Founders &amp; Entrepreneurs</option>
+            <option value="students">🎓 Students &amp; Bootcamp Grads</option>
+            <option value="data scientists">📊 Data Scientists &amp; ML Engineers</option>
+          </select>
+        </div>
+        <div class="field">
+          <label>Attach Images (optional — up to 8, used in carousel slides)</label>
+          <div class="image-drop-zone" id="imageDropZone">
+            <input type="file" id="imageInput" accept="image/*" multiple style="display:none" />
+            <div class="drop-idle" id="dropIdle">
+              <span class="drop-icon">🖼️</span>
+              <span>Drop images here or <strong>click to browse</strong></span>
+              <span class="drop-sub">PNG, JPG, WebP · up to 8 images · embedded in carousel slides</span>
+            </div>
+          </div>
+          <!-- Thumbnail grid -->
+          <div class="img-thumbs hidden" id="imgThumbs"></div>
+        </div>
+      </div>
+
+      <button id="runBtn" onclick="handleRun()" aria-label="Run LinkedAgent">
+        <span class="btn-glow" aria-hidden="true"></span>
+        <span id="btnText">
+          <span class="btn-icon">⚡</span>
+          Run LinkedAgent
+        </span>
+      </button>
+
+      <!-- Loading bar -->
+      <div class="loading-bar hidden" id="loadingBar" role="status" aria-label="Processing">
+        <div class="loading-fill" id="loadingFill"></div>
+        <span class="loading-label" id="loadingLabel">Initializing agent...</span>
+      </div>
+    </section>
+
+    <!-- ── TRENDING RADAR ────────────────────────────────── -->
+    <section class="card" id="trendingPanel">
+      <div class="card-header">
+        <div class="card-icon red">🔥</div>
+        <div>
+          <h2 class="card-title">Trending Topic Radar</h2>
+          <p class="card-sub">Live keyword detection — updates as you type</p>
+        </div>
+        <span class="iq-tag">Foundry IQ Live</span>
+      </div>
+      <div id="trendingContent">
+        <p class="empty-state">
+          <span class="empty-icon">📡</span>
+          Start typing your draft — the radar will detect matching trending topics in real time.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── SCHEDULE PLANNER ──────────────────────────────── -->
+    <section class="card hidden" id="schedulePanel">
+      <div class="card-header">
+        <div class="card-icon green">📅</div>
+        <div>
+          <h2 class="card-title">Best Time to Post</h2>
+          <p class="card-sub">Algorithm-optimized posting windows for your audience</p>
+        </div>
+        <span class="iq-tag">Algorithm-Based</span>
+      </div>
+      <div id="scheduleContent"></div>
+    </section>
+
+    <!-- ── ANALYTICS DASHBOARD ───────────────────────────── -->
+    <section class="card" id="analyticsPanel">
+      <div class="card-header">
+        <div class="card-icon purple">📊</div>
+        <div>
+          <h2 class="card-title">Foundry IQ — Live Analytics</h2>
+          <p class="card-sub">Dynamic rule engine adjusts based on your post history</p>
+        </div>
+        <span class="iq-tag">Dynamic Rules</span>
+        <button class="ghost-btn" onclick="handleResetAnalytics()" aria-label="Reset analytics data">Reset</button>
+      </div>
+      <div id="analyticsContent">
+        <p class="empty-state">
+          <span class="empty-icon">📈</span>
+          No data yet. Copy a post to start building your performance history.
+        </p>
+      </div>
+    </section>
+
+    <!-- ── REASONING LOG ─────────────────────────────────── -->
+    <section class="card hidden" id="reasoningPanel">
+      <div class="card-header">
+        <div class="card-icon indigo">🧠</div>
+        <div>
+          <h2 class="card-title">Agent Reasoning Log</h2>
+          <p class="card-sub">Multi-step thinking trace from LLaMA 3.3 70B</p>
+        </div>
+        <span class="iq-tag">Foundry IQ Grounded</span>
+      </div>
+      <div id="reasoningSteps"></div>
+      <div id="extractedTokens"></div>
+      <div id="altTextPanel" class="alt-text-panel hidden"></div>
+    </section>
+
+    <!-- ── OUTPUT PANEL ──────────────────────────────────── -->
+    <section class="hidden" id="outputPanel">
+      <div class="output-header">
+        <div class="card-header" style="padding:0; border:none; background:none;">
+          <div class="card-icon amber">📝</div>
+          <div>
+            <h2 class="card-title">Optimized Post Variants</h2>
+            <p class="card-sub">Two angles, full metadata, publish-ready briefing</p>
+          </div>
+        </div>
+        <div class="ab-tabs" role="tablist" aria-label="Post variant selector">
+          <button class="ab-tab active" data-variant="a" onclick="switchVariant('a')" role="tab" aria-selected="true">🎓 Educational</button>
+          <button class="ab-tab" data-variant="b" onclick="switchVariant('b')" role="tab" aria-selected="false">🚀 Career</button>
+          <button class="ab-tab" data-variant="both" onclick="switchVariant('both')" role="tab" aria-selected="false">⚡ Side-by-Side</button>
+        </div>
+      </div>
+
+      <div class="variants-grid" id="variantsGrid">
+        <div class="variant-card" id="variantA" role="tabpanel"></div>
+        <div class="variant-card" id="variantB" role="tabpanel"></div>
+      </div>
+
+      <!-- Carousel -->
+      <div class="carousel-panel hidden" id="carouselPanel">
+        <div class="carousel-inner">
+          <div class="carousel-left">
+            <div class="carousel-icon">🎠</div>
+            <div>
+              <div class="carousel-title">Carousel Detected</div>
+              <p class="carousel-desc">Your draft has a list or table. Export as a PDF — LinkedIn renders it as a swipeable carousel with 3× more impressions.</p>
+            </div>
+          </div>
+          <button class="carousel-btn" onclick="handleCarouselExport()">⬇ Export PDF Carousel</button>
+        </div>
+      </div>
+
+      <div class="iq-citation" id="iqCitation"></div>
+    </section>
+
+    <!-- ── ERROR ─────────────────────────────────────────── -->
+    <div class="error-panel hidden" id="errorPanel" role="alert"></div>
+
+  </main>
+
+  <!-- ── FOOTER ────────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span class="nav-name">Linked<span class="nav-accent">Agent</span></span>
+      </div>
+      <div class="footer-links">
+        <span>Built for</span>
+        <span class="footer-tag">🏆 Agents League Hackathon 2026</span>
+        <span class="footer-tag">⚡ Microsoft Foundry IQ</span>
+        <span class="footer-tag">🧠 Reasoning Agents Track</span>
+      </div>
+      <p class="footer-copy">Submission deadline: June 14, 2026 · Winners announced June 30, 2026</p>
+    </div>
+  </footer>
+
+  <script type="module">
+    import {
+      runViralCraftAgent,
+      processImageFiles,
+      generateCarouselPDF,
+      trackPostPerformance,
+      getAnalyticsSummary,
+      clearAnalytics,
+      detectTrendingTopics,
+      getBestPostingSlots
+    } from './agent.js';
+
+    // ── State ────────────────────────────────────────────────
+    let _posts = { a:'', b:'' };
+    let _variants = { a:null, b:null };
+    let _carouselSource = null;
+    let _carouselTitle  = '';
+    let _images = [];          // array of { dataUrl, fileName, caption }
+
+    // ── Expose globals ───────────────────────────────────────
+    window.handleRun            = handleRun;
+    window.handleCarouselExport = handleCarouselExport;
+    window.handleResetAnalytics = handleResetAnalytics;
+    window.copyPost             = copyPost;
+    window.switchVariant        = switchVariant;
+
+    // ── Char counter ─────────────────────────────────────────
+    const draftEl = document.getElementById('draft');
+    const counter = document.getElementById('charCounter');
+    draftEl.addEventListener('input', () => {
+      const n = draftEl.value.length;
+      counter.textContent = `${n} character${n!==1?'s':''}`;
+    });
+
+    // ── Multi-Image Upload ───────────────────────────────────
+    const dropZone = document.getElementById('imageDropZone');
+    const imgInput = document.getElementById('imageInput');
+    const thumbsEl = document.getElementById('imgThumbs');
+    const dropIdle = document.getElementById('dropIdle');
+    const MAX_IMAGES = 8;
+
+    dropZone.addEventListener('click', () => imgInput.click());
+    dropZone.addEventListener('dragover', e => { e.preventDefault(); dropZone.classList.add('drag-over'); });
+    dropZone.addEventListener('dragleave', () => dropZone.classList.remove('drag-over'));
+    dropZone.addEventListener('drop', e => {
+      e.preventDefault(); dropZone.classList.remove('drag-over');
+      loadFiles(e.dataTransfer.files);
+    });
+    imgInput.addEventListener('change', () => loadFiles(imgInput.files));
+
+    async function loadFiles(fileList) {
+      const files = Array.from(fileList)
+        .filter(f => f.type.startsWith('image/'))
+        .slice(0, MAX_IMAGES - _images.length);
+      if (!files.length) return;
+
+      const newImgs = await processImageFiles(files);
+      _images = [..._images, ...newImgs].slice(0, MAX_IMAGES);
+      renderThumbs();
+      imgInput.value = '';
+    }
+
+    function renderThumbs() {
+      if (_images.length === 0) {
+        thumbsEl.classList.add('hidden');
+        dropIdle.style.display = '';
+        return;
+      }
+      dropIdle.style.display = 'none';
+      thumbsEl.classList.remove('hidden');
+      thumbsEl.innerHTML = _images.map((img, i) => `
+        <div class="thumb-item" data-idx="${i}">
+          <img src="${img.dataUrl}" alt="${escHtml(img.fileName)}" class="thumb-img" />
+          <input class="thumb-caption" type="text" value="${escHtml(img.caption)}"
+            placeholder="Caption…" aria-label="Caption for image ${i+1}"
+            onchange="updateCaption(${i}, this.value)" />
+          <button class="thumb-remove" onclick="removeImage(${i})" aria-label="Remove image ${i+1}">✕</button>
+        </div>`).join('');
+
+      // Add "+ more" tile if under limit
+      if (_images.length < MAX_IMAGES) {
+        thumbsEl.innerHTML += `
+          <div class="thumb-add" onclick="document.getElementById('imageInput').click()" role="button" tabindex="0" aria-label="Add more images">
+            <span>+</span><span class="thumb-add-lbl">Add more</span>
+          </div>`;
+      }
+    }
+
+    window.removeImage = function(idx) {
+      _images.splice(idx, 1);
+      renderThumbs();
+    };
+    window.updateCaption = function(idx, val) {
+      if (_images[idx]) _images[idx].caption = val;
+    };
+
+    // ── Live trending radar ──────────────────────────────────
+    let _trendTimer;
+    draftEl.addEventListener('input', () => {
+      clearTimeout(_trendTimer);
+      _trendTimer = setTimeout(() => renderTrendingRadar(draftEl.value), 500);
+    });
+
+    // ── Loading animation ────────────────────────────────────
+    const STEPS = [
+      'Initializing Foundry IQ rules…',
+      'Extracting technology & achievement…',
+      'Generating educational hook…',
+      'Generating career/growth hook…',
+      'Formatting post structure…',
+      'Selecting optimal hashtags…',
+      'Detecting @mentions…',
+      'Writing first comment…',
+      'Running pre-publish checklist…',
+      'Scoring & finalizing variants…'
+    ];
+    let _loadStep = 0, _loadTimer;
+    function startLoading() {
+      const bar = document.getElementById('loadingBar');
+      const fill = document.getElementById('loadingFill');
+      const lbl  = document.getElementById('loadingLabel');
+      bar.classList.remove('hidden');
+      _loadStep = 0;
+      function tick() {
+        if(_loadStep >= STEPS.length) return;
+        lbl.textContent = STEPS[_loadStep];
+        fill.style.width = `${((_loadStep+1)/STEPS.length)*100}%`;
+        _loadStep++;
+        _loadTimer = setTimeout(tick, 900);
+      }
+      tick();
+    }
+    function stopLoading() {
+      clearTimeout(_loadTimer);
+      document.getElementById('loadingFill').style.width = '100%';
+      setTimeout(() => document.getElementById('loadingBar').classList.add('hidden'), 400);
+    }
+
+    // ── Main Run ─────────────────────────────────────────────
+    async function handleRun() {
+      const draft    = draftEl.value.trim();
+      const audience = document.getElementById('audience').value;
+      if(!draft) { showError('Please enter your raw draft first.'); return; }
+
+      ['reasoningPanel','outputPanel','errorPanel','carouselPanel','schedulePanel']
+        .forEach(id => document.getElementById(id).classList.add('hidden'));
+
+      const btn = document.getElementById('runBtn');
+      btn.disabled = true;
+      document.getElementById('btnText').innerHTML = '<span class="btn-icon spin">⚙️</span> Agent reasoning…';
+      startLoading();
+
+      // Pass first image as context hint to the agent, all images to carousel
+      const primaryImage = _images[0] || null;
+
+      try {
+        const result = await runViralCraftAgent(draft, audience, primaryImage);
+        stopLoading();
+        if(result.error) { showError(result.error+'\n\n'+(result.raw||'')); return; }
+        renderReasoning(result);
+        renderVariants(result);
+        renderSchedulePlanner(audience);
+        renderTrendingRadar(draft);
+        refreshAnalyticsDashboard();
+        setTimeout(() => document.getElementById('reasoningPanel').scrollIntoView({behavior:'smooth', block:'start'}), 100);
+      } catch(err) {
+        stopLoading();
+        showError('API Error: '+err.message);
+      } finally {
+        btn.disabled = false;
+        document.getElementById('btnText').innerHTML = '<span class="btn-icon">⚡</span> Run LinkedAgent';
+      }
+    }
+
+    // ── Trending Radar ───────────────────────────────────────
+    function renderTrendingRadar(text) {
+      if(!text || text.length < 15) return;
+      const topics = detectTrendingTopics(text);
+      const c = document.getElementById('trendingContent');
+      if(!topics.length) {
+        c.innerHTML = '<p class="empty-state"><span class="empty-icon">📡</span>No trending match yet — try adding technology names like React, Python, AI, Docker…</p>';
+        return;
+      }
+      c.innerHTML = `<div class="trending-grid">${topics.map(t=>`
+        <div class="trending-card animate-in">
+          <div class="trending-top">
+            <span class="trending-label">${escHtml(t.label)}</span>
+            <span class="trending-momentum">${t.momentum}</span>
+          </div>
+          <div class="trending-bar-wrap">
+            <div class="trending-bar" style="width:${t.score}%" role="progressbar" aria-valuenow="${t.score}" aria-valuemax="100"></div>
+            <span class="trending-score">${t.score}</span>
+          </div>
+          <div class="trending-hits">${t.hits.map(h=>`<span class="hit-tag">${escHtml(h)}</span>`).join('')}</div>
+          <p class="trending-tip">💡 ${escHtml(t.tip)}</p>
+        </div>`).join('')}</div>`;
+    }
+
+    // ── Schedule Planner ─────────────────────────────────────
+    function renderSchedulePlanner(audience) {
+      const slots = getBestPostingSlots(audience);
+      const now = new Date();
+      const c = document.getElementById('scheduleContent');
+      const cards = slots.map((slot,i) => {
+        const diff = (slot.day - now.getDay() + 7) % 7 || 7;
+        const d = new Date(now);
+        d.setDate(now.getDate()+diff);
+        d.setHours(slot.hour,0,0,0);
+        const dateStr = d.toLocaleDateString('en-US',{weekday:'long',month:'short',day:'numeric'});
+        const timeStr = d.toLocaleTimeString('en-US',{hour:'2-digit',minute:'2-digit'});
+        const isTop = i===0;
+        return `
+          <div class="slot-card animate-in ${isTop?'slot-top':''}">
+            ${isTop?'<div class="slot-best-badge">⭐ Best Slot</div>':''}
+            <div class="slot-header">
+              <div class="slot-time-badge">${escHtml(slot.label)}</div>
+              <div class="slot-score-bar"><div style="width:${slot.score*10}%" role="progressbar" aria-valuenow="${slot.score*10}" aria-valuemax="100"></div></div>
+              <span class="slot-score-num">${slot.score}/10</span>
+            </div>
+            <div class="slot-date">📆 ${dateStr} at ${timeStr} <span class="tz-note">(your local time)</span></div>
+            <p class="slot-reason">📌 ${escHtml(slot.reason)}</p>
+            <button class="ghost-btn small" onclick="copySchedule('${escHtml(dateStr)} at ${escHtml(timeStr)}')" aria-label="Copy date and time">📋 Copy</button>
+          </div>`;
+      }).join('');
+      c.innerHTML = `<div class="slot-list">${cards}</div>
+        <p class="schedule-note">⏱ Post within ±30 min of your slot. Comments in the first 60 min carry the most algorithmic weight.</p>`;
+      document.getElementById('schedulePanel').classList.remove('hidden');
+    }
+    window.copySchedule = function(text) {
+      navigator.clipboard.writeText(text);
+      event.target.textContent='✅ Copied!';
+      setTimeout(()=>{event.target.textContent='📋 Copy';},2000);
+    };
+
+    // ── Reasoning ────────────────────────────────────────────
+    function renderReasoning(result) {
+      document.getElementById('reasoningSteps').innerHTML =
+        (result.reasoning_log||[]).map((s,i)=>`
+          <div class="step animate-in" style="animation-delay:${i*60}ms">
+            <span class="step-num">${i+1}</span>${escHtml(s)}
+          </div>`).join('');
+
+      const e = result.extracted||{};
+      document.getElementById('extractedTokens').innerHTML = `<div class="tokens">
+        ${e.technology  ?`<span class="token tech">🔧 ${escHtml(e.technology)}</span>`:''}
+        ${e.achievement ?`<span class="token ach">🏆 ${escHtml(e.achievement)}</span>`:''}
+        ${e.metric      ?`<span class="token met">📊 ${escHtml(e.metric)}</span>`:''}
+        ${e.audience    ?`<span class="token aud">👥 ${escHtml(e.audience)}</span>`:''}
+        ${e.pain_point  ?`<span class="token pain">⚠️ ${escHtml(e.pain_point)}</span>`:''}
+      </div>`;
+
+      const ap = document.getElementById('altTextPanel');
+      if(result.alt_text && _images.length > 0) {
+        ap.innerHTML=`<strong>🖼 Auto-generated Alt-Text:</strong><br>${escHtml(result.alt_text)}`;
+        ap.classList.remove('hidden');
+      } else ap.classList.add('hidden');
+
+      document.getElementById('reasoningPanel').classList.remove('hidden');
+    }
+
+    // ── Variants ─────────────────────────────────────────────
+    function renderVariants(result) {
+      _variants = { a:result.variant_a, b:result.variant_b };
+      _posts    = { a:result.variant_a?.post||'', b:result.variant_b?.post||'' };
+      _carouselSource = result.carousel_source||null;
+      _carouselTitle  = result.extracted?.technology||'LinkedIn Carousel';
+
+      ['a','b'].forEach(v=>{
+        const variant = result[`variant_${v}`];
+        if(!variant) return;
+        const card  = document.getElementById(`variant${v.toUpperCase()}`);
+        const score = variant.score||0;
+        const color = score>=80?'#22c55e':score>=65?'#f59e0b':'#ef4444';
+        const meta  = variant.metadata||{};
+
+        const breakdownHTML = Object.entries(variant.score_breakdown||{}).map(([k,val])=>{
+          const max=getMax(k), pct=Math.min(Math.round((val/max)*100),100);
+          return `<div class="score-row"><span>${k}</span><div class="bar"><div style="width:${pct}%" role="progressbar" aria-valuenow="${pct}" aria-valuemax="100"></div></div><span>${val}</span></div>`;
+        }).join('');
+
+        const rulesHTML=(variant.rules_applied||[]).map(r=>`<span class="rule-tag">✓ ${escHtml(r)}</span>`).join('');
+
+        const checkHTML=(meta.checklist||[]).map(c=>{
+          const icon=c.status==='pass'?'✅':c.status==='warn'?'⚠️':'❌';
+          return `<div class="check-row ${c.status}" role="listitem">
+            <span class="check-icon" aria-hidden="true">${icon}</span>
+            <span class="check-rule">${escHtml(c.rule)}</span>
+            <span class="check-detail">${escHtml(c.detail||'')}</span>
+          </div>`;
+        }).join('');
+
+        const tags=(meta.hashtags||[]).map(h=>`<span class="meta-tag hashtag">${escHtml(h)}</span>`).join('');
+        const ments=(meta.mentions||[]).map(m=>`<span class="meta-tag mention">${escHtml(m)}</span>`).join('');
+        const angleCls=variant.angle==='educational'?'educational':'career';
+        const angleIcon=variant.angle==='educational'?'🎓':'🚀';
+        const angleLabel=variant.angle==='educational'?'Educational Deep-Dive':'Career / Growth Story';
+
+        card.innerHTML=`
+          <div class="vcard-top">
+            <div class="vcard-label-wrap">
+              <span class="angle-pill ${angleCls}">${angleIcon} ${escHtml(angleLabel)}</span>
+            </div>
+            <div class="score-ring" style="--score-color:${color}" aria-label="Score: ${score} out of 100">
+              <span>${score}</span><small>/100</small>
+            </div>
+          </div>
+
+          <div class="post-text" aria-label="Generated post text">${formatPost(variant.post||'')}</div>
+          <button class="copy-btn primary" onclick="copyPost('${v}')" aria-label="Copy post variant ${v}">📋 Copy Post</button>
+
+          <div class="meta-pills">
+            <span class="meta-pill">📝 ${meta.word_count||'?'} words</span>
+            <span class="meta-pill">🔤 ${meta.char_count||'?'} chars</span>
+            <span class="meta-pill">⏱ ${meta.reading_time_sec||'?'}s read</span>
+          </div>
+
+          <div class="meta-section">
+            <div class="meta-section-label">Hashtags</div>
+            <div class="meta-tags" role="list">${tags||'<span class="muted-sm">None detected</span>'}</div>
+          </div>
+          <div class="meta-section">
+            <div class="meta-section-label">Suggested @Mentions</div>
+            <div class="meta-tags" role="list">${ments||'<span class="muted-sm">None detected</span>'}</div>
+          </div>
+
+          ${meta.hook_preview?`
+          <div class="meta-section">
+            <div class="meta-section-label">👁 Hook Preview — what shows before "See more"</div>
+            <div class="hook-preview">${escHtml(meta.hook_preview)}</div>
+          </div>`:''}
+
+          ${meta.first_comment?`
+          <div class="meta-section">
+            <div class="meta-section-label">📬 First Comment — post immediately after publishing</div>
+            <div class="first-comment-box">${formatPost(meta.first_comment)}</div>
+            <button class="copy-btn secondary" onclick="copyText('${v}')" aria-label="Copy first comment for variant ${v}">📋 Copy First Comment</button>
+          </div>`:''}
+
+          <div class="meta-section">
+            <div class="meta-section-label">✅ Pre-Publish Checklist</div>
+            <div class="checklist" role="list">${checkHTML}</div>
+          </div>
+
+          <details class="score-details">
+            <summary>Score Breakdown</summary>
+            <div class="score-breakdown">${breakdownHTML}</div>
+            <div class="rules-applied">${rulesHTML}</div>
+          </details>`;
+
+        if(meta.first_comment) window[`_comment_${v}`]=meta.first_comment;
+      });
+
+      document.getElementById('iqCitation').innerHTML=`📌 ${escHtml(result.iq_citation||'')}`;
+      // Show carousel panel when draft has list/table OR images are attached
+      if(_carouselSource || _images.length > 0) document.getElementById('carouselPanel').classList.remove('hidden');
+      switchVariant('both');
+      document.getElementById('outputPanel').classList.remove('hidden');
+    }
+
+    // ── Variant tab switch ───────────────────────────────────
+    function switchVariant(v) {
+      const grid=document.getElementById('variantsGrid');
+      const cA=document.getElementById('variantA');
+      const cB=document.getElementById('variantB');
+      document.querySelectorAll('.ab-tab').forEach(t=>{
+        t.classList.toggle('active',t.dataset.variant===v);
+        t.setAttribute('aria-selected', t.dataset.variant===v ? 'true':'false');
+      });
+      if(v==='both'){
+        grid.style.gridTemplateColumns='1fr 1fr';
+        cA.classList.remove('hidden'); cB.classList.remove('hidden');
+      } else if(v==='a'){
+        grid.style.gridTemplateColumns='1fr';
+        cA.classList.remove('hidden'); cB.classList.add('hidden');
+      } else {
+        grid.style.gridTemplateColumns='1fr';
+        cA.classList.add('hidden'); cB.classList.remove('hidden');
+      }
+    }
+
+    // ── Copy helpers ─────────────────────────────────────────
+    function copyPost(v) {
+      const text=_posts[v]; if(!text) return;
+      navigator.clipboard.writeText(text);
+      const vv=_variants[v];
+      if(vv){ trackPostPerformance(vv); refreshAnalyticsDashboard(); }
+      const b=event.target;
+      b.textContent='✅ Copied & Tracked!';
+      setTimeout(()=>{b.textContent='📋 Copy Post';},2000);
+    }
+    window.copyText=function(v) {
+      const t=window[`_comment_${v}`]; if(t) navigator.clipboard.writeText(t);
+      const b=event.target;
+      b.textContent='✅ Copied!';
+      setTimeout(()=>{b.textContent='📋 Copy First Comment';},2000);
+    };
+
+    // ── Carousel ─────────────────────────────────────────────
+    function handleCarouselExport() {
+      // Always use the full draft text as the source — reliable content
+      // Fall back to carousel_source from agent if draft is empty
+      const source = draftEl.value.trim() || _carouselSource || '';
+      if (!source && _images.length === 0) {
+        showError('Nothing to export — enter a draft or attach images first.');
+        return;
+      }
+      generateCarouselPDF(source, _carouselTitle || 'LinkedIn Post', _images);
+    }
+
+    // ── Analytics ────────────────────────────────────────────
+    function refreshAnalyticsDashboard() {
+      const s=getAnalyticsSummary();
+      const c=document.getElementById('analyticsContent');
+      if(s.total===0){
+        c.innerHTML='<p class="empty-state"><span class="empty-icon">📈</span>No data yet. Copy a post to start tracking.</p>';
+        return;
+      }
+      const rows=s.history.map(h=>`
+        <div class="history-row">
+          <span class="history-date">${h.date}</span>
+          <span class="history-angle ${h.angle}">${h.angle}</span>
+          <span class="history-tags">${h.hashtagCount} tags</span>
+          <div class="history-bar-wrap" role="presentation"><div class="history-bar" style="width:${h.score}%" role="progressbar" aria-valuenow="${h.score}" aria-valuemax="100"></div></div>
+          <span class="history-score">${h.score}</span>
+        </div>`).join('');
+      c.innerHTML=`
+        <div class="analytics-grid">
+          <div class="analytics-stat"><div class="stat-value">${s.total}</div><div class="stat-label">Posts Tracked</div></div>
+          <div class="analytics-stat"><div class="stat-value">${s.avgScore}</div><div class="stat-label">Avg Score</div></div>
+          <div class="analytics-stat"><div class="stat-value capitalize">${s.bestAngle}</div><div class="stat-label">Best Angle</div></div>
+          <div class="analytics-stat accent">
+            <div class="stat-value">${s.bestHashtagCount}</div>
+            <div class="stat-label">Optimal Hashtags<br><small>auto-applied next run</small></div>
+          </div>
+        </div>
+        <div class="history-list"><div class="history-list-header">Recent Posts</div>${rows}</div>`;
+    }
+    function handleResetAnalytics() {
+      if(!confirm('Clear all analytics? This resets the dynamic rule engine.')) return;
+      clearAnalytics(); refreshAnalyticsDashboard();
+    }
+
+    // ── Helpers ──────────────────────────────────────────────
+    function formatPost(text) {
+      if(!text) return '';
+      return text
+        .replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;')
+        .replace(/\n\n/g,'</p><p style="margin:0.75rem 0 0;">')
+        .replace(/\n/g,'<br>')
+        .replace(/(#\w+)/g,'<span class="hashtag">$1</span>')
+        .replace(/(@[\w]+)/g,'<span class="mention">$1</span>');
+    }
+    function escHtml(s) {
+      return String(s).replace(/&/g,'&amp;').replace(/</g,'&lt;').replace(/>/g,'&gt;').replace(/"/g,'&quot;');
+    }
+    function getMax(k) {
+      return {hook:30,structure:20,hashtags:15,mentions:10,cta:15,length:10}[k]||20;
+    }
+    function showError(msg) {
+      const p=document.getElementById('errorPanel');
+      p.textContent=msg; p.classList.remove('hidden');
+    }
+
+    // ── Init ─────────────────────────────────────────────────
+    refreshAnalyticsDashboard();
+
+    // ── Particle canvas background ────────────────────────────
+    (function initParticles() {
+      const canvas = document.getElementById('bgParticles');
+      if (!canvas) return;
+      const ctx = canvas.getContext('2d');
+      let W, H, particles;
+
+      function resize() {
+        W = canvas.width  = window.innerWidth;
+        H = canvas.height = window.innerHeight;
+      }
+
+      function createParticles(n) {
+        return Array.from({ length: n }, () => ({
+          x: Math.random() * W,
+          y: Math.random() * H,
+          r: Math.random() * 1.5 + 0.3,
+          dx: (Math.random() - 0.5) * 0.35,
+          dy: (Math.random() - 0.5) * 0.35,
+          // LinkedIn blue / violet alternating
+          hue: Math.random() > 0.5 ? 210 : 260,
+          alpha: Math.random() * 0.5 + 0.15
+        }));
+      }
+
+      function draw() {
+        ctx.clearRect(0, 0, W, H);
+        particles.forEach(p => {
+          ctx.beginPath();
+          ctx.arc(p.x, p.y, p.r, 0, Math.PI * 2);
+          ctx.fillStyle = `hsla(${p.hue}, 80%, 65%, ${p.alpha})`;
+          ctx.fill();
+
+          p.x += p.dx;
+          p.y += p.dy;
+          if (p.x < 0) p.x = W;
+          if (p.x > W) p.x = 0;
+          if (p.y < 0) p.y = H;
+          if (p.y > H) p.y = 0;
+        });
+
+        // Draw faint connection lines between close particles
+        for (let i = 0; i < particles.length; i++) {
+          for (let j = i + 1; j < particles.length; j++) {
+            const dx = particles[i].x - particles[j].x;
+            const dy = particles[i].y - particles[j].y;
+            const dist = Math.sqrt(dx*dx + dy*dy);
+            if (dist < 100) {
+              ctx.beginPath();
+              ctx.moveTo(particles[i].x, particles[i].y);
+              ctx.lineTo(particles[j].x, particles[j].y);
+              ctx.strokeStyle = `rgba(55,143,233,${0.06 * (1 - dist/100)})`;
+              ctx.lineWidth = 0.5;
+              ctx.stroke();
+            }
+          }
+        }
+        requestAnimationFrame(draw);
+      }
+
+      resize();
+      window.addEventListener('resize', () => { resize(); particles = createParticles(60); });
+      particles = createParticles(60);
+      draw();
+    })();
+  </script>
+</body>
+</html>
