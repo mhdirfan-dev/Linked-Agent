@@ -376,7 +376,7 @@ function parseTextToSlides(source, title) {
       .split('|').map(h => h.trim()).filter(Boolean);
     // Row 1 is headers, row 2 is separator (---)
     const dataRows = tableLines.slice(2)
-      .filter(l => !l.replace(/[|\s-]/g, '').length === 0) // skip pure separator rows
+      .filter(l => l.replace(/[|\s-]/g, '').length > 0) // skip pure separator rows
       .map(row => row.split('|').map(c => c.trim()).filter(Boolean))
       .filter(r => r.length > 0);
 

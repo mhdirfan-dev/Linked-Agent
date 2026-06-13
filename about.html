@@ -1,0 +1,1099 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>About — LinkedAgent</title>
+  <meta name="description" content="About LinkedAgent — AI reasoning agent for LinkedIn built on GROQ LLaMA 3.3 70B and Microsoft Foundry IQ." />
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&family=Space+Mono:wght@400;700&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+
+  <style>
+    /* ─── RESET & BASE ──────────────────────────────────── */
+    body { overflow-x: hidden; }
+
+    /* ─── DIAGONAL SPLIT HERO ───────────────────────────── */
+    .split-hero {
+      position: relative;
+      z-index: 1;
+      min-height: 100vh;
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      overflow: hidden;
+    }
+    .split-hero::after {
+      content: '';
+      position: absolute;
+      top: 0; bottom: 0;
+      left: 50%;
+      width: 120px;
+      transform: translateX(-50%) skewX(-4deg);
+      background: linear-gradient(180deg, rgba(0,200,255,0.06), rgba(155,89,255,0.04));
+      border-left: 1px solid rgba(0,200,255,0.14);
+      border-right: 1px solid rgba(155,89,255,0.08);
+      pointer-events: none;
+    }
+    .split-left {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 56px 80px 48px;
+    }
+    .split-right {
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      padding: 140px 48px 80px 56px;
+      gap: 14px;
+    }
+
+    /* tag pill */
+    .hero-tag {
+      display: inline-flex;
+      align-items: center;
+      gap: 7px;
+      padding: 5px 14px;
+      border-radius: 4px;
+      border: 1px solid rgba(0,200,255,0.3);
+      background: rgba(0,200,255,0.06);
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--cyan2);
+      letter-spacing: 0.08em;
+      text-transform: uppercase;
+      width: fit-content;
+      margin-bottom: 20px;
+    }
+    .hero-tag .blink {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      background: var(--lime);
+      animation: blink 1.4s ease-in-out infinite;
+    }
+    @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.2} }
+
+    .hero-h1 {
+      font-size: clamp(2.6rem, 5vw, 4rem);
+      font-weight: 900;
+      line-height: 1.08;
+      letter-spacing: -0.035em;
+      margin-bottom: 20px;
+    }
+    .hero-h1 .word-stroke {
+      -webkit-text-stroke: 1.5px var(--cyan2);
+      color: transparent;
+    }
+    .hero-h1 .word-fill {
+      background: linear-gradient(90deg, var(--cyan), var(--lime));
+      background-size: 200% auto;
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .hero-desc {
+      font-size: 1rem;
+      color: var(--text2);
+      line-height: 1.8;
+      max-width: 460px;
+      margin-bottom: 32px;
+    }
+    .hero-btn-row {
+      display: flex;
+      gap: 12px;
+      flex-wrap: wrap;
+    }
+    .btn-go {
+      display: inline-flex;
+      align-items: center;
+      gap: 8px;
+      padding: 13px 26px;
+      border-radius: 6px;
+      font-size: 0.88rem;
+      font-weight: 700;
+      text-decoration: none;
+      letter-spacing: 0.01em;
+      transition: all 0.22s;
+    }
+    .btn-solid {
+      background: linear-gradient(135deg, var(--accent), var(--violet));
+      color: #fff;
+      box-shadow: 0 6px 24px rgba(55,143,233,0.3);
+    }
+    .btn-solid:hover { transform: translateY(-2px); box-shadow: 0 10px 32px rgba(55,143,233,0.4); }
+    .btn-line {
+      border: 1px solid var(--border2);
+      color: var(--text2);
+      background: transparent;
+    }
+    .btn-line:hover { border-color: var(--accent); color: var(--accent); background: rgba(55,143,233,0.05); }
+
+    /* right side: stat bricks */
+    .stat-brick {
+      display: flex;
+      align-items: center;
+      gap: 20px;
+      padding: 18px 22px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(10,15,26,0.7);
+      backdrop-filter: blur(8px);
+      transition: border-color 0.2s, transform 0.2s;
+      cursor: default;
+    }
+    .stat-brick:hover {
+      border-color: var(--border2);
+      transform: translateX(4px);
+    }
+    .stat-brick-num {
+      font-size: 2.2rem;
+      font-weight: 900;
+      font-family: 'Space Mono', monospace;
+      line-height: 1;
+      min-width: 56px;
+      text-align: right;
+    }
+    .n-blue   { color: var(--cyan2); }
+    .n-violet { color: var(--violet2); }
+    .n-green  { color: var(--lime2); }
+    .n-amber  { color: var(--amber2); }
+    .n-cyan   { color: var(--cyan); }
+    .n-red    { color: var(--red); }
+    .stat-brick-body {}
+    .stat-brick-label {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 3px;
+    }
+    .stat-brick-sub {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.4;
+    }
+
+    /* ─── SECTION SCAFFOLD ──────────────────────────────── */
+    .page-wrap {
+      max-width: 1080px;
+      margin: 0 auto;
+      padding: 0 32px 100px;
+      position: relative;
+      z-index: 1;
+    }
+
+    /* ─── OVERSIZE LABEL ────────────────────────────────── */
+    .oversize-label {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      letter-spacing: 0.18em;
+      text-transform: uppercase;
+      color: var(--muted);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .oversize-label::before {
+      content: '';
+      display: inline-block;
+      width: 28px;
+      height: 1px;
+      background: var(--muted);
+    }
+
+    .sec-h2 {
+      font-size: clamp(1.6rem, 3.5vw, 2.4rem);
+      font-weight: 900;
+      letter-spacing: -0.03em;
+      line-height: 1.15;
+      margin-bottom: 12px;
+    }
+    .sec-p {
+      color: var(--text2);
+      font-size: 0.95rem;
+      line-height: 1.75;
+      max-width: 640px;
+      margin-bottom: 40px;
+    }
+
+    /* ─── HORIZONTAL RULE ───────────────────────────────── */
+    .rule {
+      height: 1px;
+      background: linear-gradient(90deg, transparent, var(--border), transparent);
+      border: none;
+      margin: 72px 0;
+    }
+
+    /* ─── WHAT IT DOES: MARQUEE STRIP ───────────────────── */
+    .marquee-wrap {
+      overflow: hidden;
+      margin: -8px -32px 40px;
+      mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+      -webkit-mask-image: linear-gradient(90deg, transparent 0%, black 8%, black 92%, transparent 100%);
+    }
+    .marquee-track {
+      display: flex;
+      gap: 0;
+      width: max-content;
+      animation: marquee-scroll 28s linear infinite;
+    }
+    .marquee-track:hover { animation-play-state: paused; }
+    @keyframes marquee-scroll {
+      from { transform: translateX(0); }
+      to   { transform: translateX(-50%); }
+    }
+    .marquee-item {
+      display: inline-flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 28px;
+      border-right: 1px solid var(--border);
+      font-size: 0.82rem;
+      font-weight: 600;
+      color: var(--text2);
+      white-space: nowrap;
+    }
+    .marquee-item .mi-dot {
+      width: 6px; height: 6px;
+      border-radius: 50%;
+      flex-shrink: 0;
+    }
+
+    /* ─── FEATURE ROWS (alternating) ────────────────────── */
+    .feat-rows { display: flex; flex-direction: column; gap: 2px; }
+    .feat-row {
+      display: grid;
+      grid-template-columns: 52px 1fr auto;
+      align-items: start;
+      gap: 20px 24px;
+      padding: 22px 24px;
+      border-radius: 10px;
+      border: 1px solid transparent;
+      transition: background 0.2s, border-color 0.2s;
+      cursor: default;
+    }
+    .feat-row:hover {
+      background: rgba(0,200,255,0.03);
+      border-color: var(--border);
+    }
+    .feat-row-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.65rem;
+      color: var(--muted);
+      letter-spacing: 0.06em;
+      padding-top: 4px;
+      text-align: right;
+    }
+    .feat-row-body {}
+    .feat-row-title {
+      font-size: 0.95rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 5px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+    }
+    .feat-row-title .ficon { font-size: 1.1rem; }
+    .feat-row-desc {
+      font-size: 0.83rem;
+      color: var(--text2);
+      line-height: 1.65;
+      max-width: 680px;
+    }
+    .feat-chip {
+      padding: 4px 11px;
+      border-radius: 4px;
+      font-size: 0.67rem;
+      font-weight: 700;
+      letter-spacing: 0.05em;
+      text-transform: uppercase;
+      white-space: nowrap;
+      align-self: start;
+      margin-top: 2px;
+    }
+    .chip-b { background: rgba(0,200,255,0.10); color: var(--cyan2); }
+    .chip-v { background: rgba(155,89,255,0.10); color: var(--violet2); }
+    .chip-g { background: rgba(57,255,20,0.08);  color: var(--lime2); }
+    .chip-a { background: rgba(255,184,0,0.08);  color: var(--amber2); }
+    .chip-r { background: rgba(255,58,58,0.08);  color: var(--red); }
+    .chip-c { background: rgba(0,200,255,0.08);  color: var(--cyan); }
+
+    /* ─── REASONING: HORIZONTAL SCROLL CHAIN ────────────── */
+    .chain-outer {
+      overflow-x: auto;
+      padding-bottom: 16px;
+      scrollbar-width: thin;
+      scrollbar-color: var(--border) transparent;
+    }
+    .chain-outer::-webkit-scrollbar { height: 4px; }
+    .chain-outer::-webkit-scrollbar-thumb { background: var(--border); border-radius: 2px; }
+    .chain-track {
+      display: flex;
+      gap: 0;
+      align-items: stretch;
+      width: max-content;
+    }
+    .chain-node {
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      width: 200px;
+      padding: 20px 18px;
+      border: 1px solid var(--border);
+      border-right: none;
+      background: rgba(10,15,26,0.6);
+      transition: background 0.2s;
+      cursor: default;
+    }
+    .chain-node:first-child { border-radius: 6px 0 0 6px; }
+    .chain-node:last-child  { border-right: 1px solid var(--border); border-radius: 0 6px 6px 0; }
+    .chain-node:hover { background: rgba(0,200,255,0.04); }
+    .chain-node::after {
+      content: '→';
+      position: absolute;
+      right: -12px;
+      top: 50%;
+      transform: translateY(-50%);
+      font-size: 0.75rem;
+      color: var(--muted);
+      z-index: 2;
+    }
+    .chain-node:last-child::after { display: none; }
+    .chain-n {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.8rem;
+      font-weight: 700;
+      color: var(--border2);
+      line-height: 1;
+      margin-bottom: 12px;
+    }
+    .chain-name {
+      font-size: 0.82rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .chain-desc {
+      font-size: 0.73rem;
+      color: var(--muted);
+      line-height: 1.55;
+      flex: 1;
+    }
+    .chain-node:hover .chain-n { color: var(--cyan); }
+
+    /* ─── FOUNDRY IQ: 2-COL LAYOUT ──────────────────────── */
+    .iq-split {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 40px;
+      align-items: start;
+    }
+    .iq-left {}
+    .iq-right {
+      display: flex;
+      flex-direction: column;
+      gap: 12px;
+    }
+    .iq-phase {
+      display: flex;
+      gap: 16px;
+      padding: 16px 18px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(2,4,8,0.6);
+      transition: border-color 0.2s;
+    }
+    .iq-phase:hover { border-color: rgba(0,200,255,0.3); }
+    .iq-phase-num {
+      font-family: 'Space Mono', monospace;
+      font-size: 1.2rem;
+      font-weight: 700;
+      color: var(--cyan);
+      min-width: 28px;
+      flex-shrink: 0;
+    }
+    .iq-phase-title {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .iq-phase-desc {
+      font-size: 0.78rem;
+      color: var(--text2);
+      line-height: 1.6;
+    }
+    .iq-big-quote {
+      font-size: clamp(1.3rem, 2.5vw, 1.9rem);
+      font-weight: 800;
+      line-height: 1.35;
+      letter-spacing: -0.02em;
+      color: var(--text);
+      margin-bottom: 20px;
+    }
+    .iq-big-quote em {
+      font-style: normal;
+      background: linear-gradient(90deg, var(--cyan), var(--lime));
+      -webkit-background-clip: text;
+      -webkit-text-fill-color: transparent;
+      background-clip: text;
+    }
+    .iq-caption {
+      font-size: 0.85rem;
+      color: var(--text2);
+      line-height: 1.7;
+    }
+
+    /* ─── TECH STACK: BENTO ─────────────────────────────── */
+    .bento {
+      display: grid;
+      grid-template-columns: repeat(4, 1fr);
+      gap: 10px;
+    }
+    .bento-cell {
+      padding: 18px 16px;
+      border-radius: 6px;
+      border: 1px solid var(--border);
+      background: rgba(10,15,26,0.6);
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      transition: border-color 0.2s, transform 0.18s;
+    }
+    .bento-cell:hover { border-color: var(--border2); transform: translateY(-2px); }
+    .bento-cell.span2 { grid-column: span 2; }
+    .bento-cell.span3 { grid-column: span 3; }
+    .bento-icon { font-size: 1.5rem; }
+    .bento-name {
+      font-size: 0.85rem;
+      font-weight: 700;
+      color: var(--text);
+    }
+    .bento-role {
+      font-size: 0.72rem;
+      color: var(--muted);
+      line-height: 1.45;
+    }
+    .bento-dot {
+      width: 8px; height: 8px;
+      border-radius: 50%;
+      margin-top: auto;
+    }
+
+    /* ─── SECURITY: TIMELINE VERTICAL ───────────────────── */
+    .sec-timeline { display: flex; flex-direction: column; gap: 0; }
+    .sec-entry {
+      display: flex;
+      gap: 20px;
+      position: relative;
+    }
+    .sec-entry:not(:last-child)::before {
+      content: '';
+      position: absolute;
+      left: 15px;
+      top: 36px;
+      bottom: 0;
+      width: 1px;
+      background: linear-gradient(180deg, var(--border), transparent);
+    }
+    .sec-dot-col { flex-shrink: 0; padding-top: 8px; }
+    .sec-dot {
+      width: 32px; height: 32px;
+      border-radius: 50%;
+      border: 1px solid var(--border);
+      background: var(--surface2);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 0.85rem;
+      position: relative;
+      z-index: 1;
+    }    .sec-body { padding: 6px 0 32px; }
+    .sec-title {
+      font-size: 0.88rem;
+      font-weight: 700;
+      color: var(--text);
+      margin-bottom: 4px;
+    }
+    .sec-detail {
+      font-size: 0.8rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+
+    /* ─── HACKATHON: BRIEF BANNER ────────────────────────── */
+    .hk-banner {
+      display: flex;
+      align-items: center;
+      gap: 24px;
+      padding: 28px 32px;
+      border-radius: 8px;
+      border: 1px solid rgba(0,200,255,0.25);
+      background: linear-gradient(135deg, rgba(0,200,255,0.05), rgba(155,89,255,0.04));
+      position: relative;
+      overflow: hidden;
+    }
+    .hk-banner::before {
+      content: '';
+      position: absolute;
+      top: -40px; right: -40px;
+      width: 200px; height: 200px;
+      border-radius: 50%;
+      background: radial-gradient(circle, rgba(0,200,255,0.10), transparent 70%);
+      pointer-events: none;
+    }
+    .hk-trophy { font-size: 3rem; flex-shrink: 0; }
+    .hk-body { flex: 1; }
+    .hk-title {
+      font-size: 1rem;
+      font-weight: 800;
+      color: var(--text);
+      margin-bottom: 6px;
+    }
+    .hk-meta {
+      font-size: 0.82rem;
+      color: var(--text2);
+      line-height: 1.65;
+    }
+    .hk-tags {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-top: 12px;
+    }
+    .hk-tag {
+      padding: 4px 12px;
+      border-radius: 4px;
+      border: 1px solid var(--border);
+      font-size: 0.72rem;
+      font-weight: 600;
+      color: var(--text2);
+      background: rgba(5,8,16,0.4);
+    }
+    .hk-score-col {
+      display: flex;
+      flex-direction: column;
+      gap: 6px;
+      flex-shrink: 0;
+      min-width: 200px;
+    }
+    .hk-score-row {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      font-size: 0.75rem;
+    }
+    .hk-score-label { color: var(--muted); flex: 1; }
+    .hk-score-bar {
+      width: 80px;
+      height: 3px;
+      background: var(--surface);
+      border-radius: 2px;
+      overflow: hidden;
+    }
+    .hk-score-fill {
+      height: 100%;
+      border-radius: 2px;
+      background: linear-gradient(90deg, var(--cyan), var(--lime));
+    }
+    .hk-score-pct {
+      font-family: 'Space Mono', monospace;
+      font-size: 0.68rem;
+      color: var(--cyan2);
+      min-width: 26px;
+      text-align: right;
+    }
+
+    /* ─── FOOTER QUOTE ──────────────────────────────────── */
+    .closing-strip {
+      text-align: center;
+      padding: 40px 24px 0;
+    }
+    .closing-strip p {
+      font-size: 0.88rem;
+      color: var(--muted);
+      font-style: italic;
+    }
+
+    /* ─── RESPONSIVE ────────────────────────────────────── */
+    @media (max-width: 860px) {
+      .split-hero { grid-template-columns: 1fr; min-height: auto; }
+      .split-hero::after { display: none; }
+      .split-left  { padding: 120px 24px 32px; }
+      .split-right { padding: 0 24px 64px; }
+      .iq-split    { grid-template-columns: 1fr; gap: 24px; }
+      .bento       { grid-template-columns: 1fr 1fr; }
+      .bento-cell.span2, .bento-cell.span3 { grid-column: span 2; }
+      .hk-banner   { flex-direction: column; align-items: flex-start; }
+      .hk-score-col { min-width: 100%; }
+      .page-wrap   { padding: 0 20px 80px; }
+    }
+    @media (max-width: 540px) {
+      .bento { grid-template-columns: 1fr; }
+      .bento-cell.span2, .bento-cell.span3 { grid-column: span 1; }
+      .chain-node { width: 168px; }
+      .feat-row { grid-template-columns: 36px 1fr; }
+      .feat-chip { display: none; }
+    }
+  </style>
+</head>
+<body>
+
+  <div class="bg-orbs" aria-hidden="true">
+    <div class="orb orb-1"></div><div class="orb orb-2"></div>
+    <div class="orb orb-3"></div><div class="orb orb-4"></div>
+    <div class="orb orb-5"></div>
+  </div>
+  <div class="grid-overlay" aria-hidden="true"></div>
+
+  <!-- ── NAV ─────────────────────────────────────────────── -->
+  <nav class="navbar">
+    <div class="nav-inner">
+      <div class="nav-logo">
+        <div class="logo-icon">
+          <svg width="20" height="20" viewBox="0 0 24 24" fill="none" aria-hidden="true">
+            <rect x="2" y="2" width="9" height="9" rx="2" fill="currentColor" opacity="0.9"/>
+            <rect x="13" y="2" width="9" height="9" rx="2" fill="currentColor" opacity="0.5"/>
+            <rect x="2" y="13" width="9" height="9" rx="2" fill="currentColor" opacity="0.5"/>
+            <rect x="13" y="13" width="9" height="9" rx="2" fill="currentColor" opacity="0.9"/>
+          </svg>
+        </div>
+        <span class="nav-name">Linked<span class="nav-accent">Agent</span></span>
+      </div>
+      <div class="nav-badges">
+        <a href="index.html" class="nav-badge foundry" style="text-decoration:none">← Back to App</a>
+        <span class="nav-badge groq">🧠 GROQ LLaMA 3.3</span>
+        <span class="nav-badge hackathon">🏆 Agents League 2026</span>
+      </div>
+    </div>
+  </nav>
+
+  <!-- ── DIAGONAL SPLIT HERO ──────────────────────────────── -->
+  <section class="split-hero" aria-label="Project intro">
+
+    <div class="split-left">
+      <div class="hero-tag">
+        <span class="blink"></span>
+        About the project
+      </div>
+      <h1 class="hero-h1">
+        The agent that<br/>
+        <span class="word-stroke">thinks</span> before<br/>
+        it <span class="word-fill">writes</span>
+      </h1>
+      <p class="hero-desc">
+        LinkedAgent is a multi-step AI reasoning system that transforms
+        rough notes into two algorithm-optimized LinkedIn post variants —
+        grounded in real platform data, not generic advice.
+      </p>
+      <div class="hero-btn-row">
+        <a href="index.html" class="btn-go btn-solid">⚡ Open the App</a>
+        <a href="https://github.com/mhdirfan-dev/Linked-Agent.git" target="_blank" rel="noopener" class="btn-go btn-line">GitHub →</a>
+      </div>
+    </div>
+
+    <div class="split-right">
+      <div class="stat-brick">
+        <div class="stat-brick-num n-blue">10</div>
+        <div class="stat-brick-body">
+          <div class="stat-brick-label">Reasoning Steps</div>
+          <div class="stat-brick-sub">Extract → Hook → Format → Hashtags → Mentions → CTA → Comment → Checklist → Carousel → Score</div>
+        </div>
+      </div>
+      <div class="stat-brick">
+        <div class="stat-brick-num n-violet">2</div>
+        <div class="stat-brick-body">
+          <div class="stat-brick-label">Post Variants per run</div>
+          <div class="stat-brick-sub">Educational deep-dive + Career/Growth story — side-by-side</div>
+        </div>
+      </div>
+      <div class="stat-brick">
+        <div class="stat-brick-num n-green">8</div>
+        <div class="stat-brick-body">
+          <div class="stat-brick-label">Trending Categories</div>
+          <div class="stat-brick-sub">Live keyword radar scans your draft against all 8 LinkedIn trending topics</div>
+        </div>
+      </div>
+      <div class="stat-brick">
+        <div class="stat-brick-num n-amber">5</div>
+        <div class="stat-brick-body">
+          <div class="stat-brick-label">Audience Profiles</div>
+          <div class="stat-brick-sub">Developers · Recruiters · Founders · Students · Data Scientists — each with its own posting heatmap</div>
+        </div>
+      </div>
+      <div class="stat-brick">
+        <div class="stat-brick-num n-cyan">0</div>
+        <div class="stat-brick-body">
+          <div class="stat-brick-label">Backend Servers</div>
+          <div class="stat-brick-sub">Pure static site. One GROQ API call. No database, no accounts, no tracking.</div>
+        </div>
+      </div>
+    </div>
+
+  </section>
+
+  <main class="page-wrap">
+
+    <!-- ── WHAT IT DOES ──────────────────────────────────── -->
+    <div class="oversize-label">Capabilities</div>
+    <h2 class="sec-h2">What LinkedAgent produces</h2>
+    <p class="sec-p">
+      Paste anything — bullet points, markdown tables, raw ideas. Every run returns
+      a full publishing package, not just a post.
+    </p>
+
+    <!-- scrolling marquee strip -->
+    <div class="marquee-wrap" aria-hidden="true">
+      <div class="marquee-track">
+        <!-- set A -->
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--accent)"></span>2 Post Variants</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--violet)"></span>10-Step Reasoning Log</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--green)"></span>Schedule Planner</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--red)"></span>Trending Radar</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--amber)"></span>PDF Carousel Export</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--cyan)"></span>Dynamic Analytics</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--accent)"></span>Alt-Text Generation</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--violet)"></span>Pre-Publish Checklist</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--green)"></span>First Comment</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--amber)"></span>Smart Hashtags</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--red)"></span>@Mention Detection</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--cyan)"></span>Hook Preview</span>
+        <!-- set B (duplicate for seamless loop) -->
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--accent)"></span>2 Post Variants</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--violet)"></span>10-Step Reasoning Log</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--green)"></span>Schedule Planner</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--red)"></span>Trending Radar</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--amber)"></span>PDF Carousel Export</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--cyan)"></span>Dynamic Analytics</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--accent)"></span>Alt-Text Generation</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--violet)"></span>Pre-Publish Checklist</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--green)"></span>First Comment</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--amber)"></span>Smart Hashtags</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--red)"></span>@Mention Detection</span>
+        <span class="marquee-item"><span class="mi-dot" style="background:var(--cyan)"></span>Hook Preview</span>
+      </div>
+    </div>
+
+    <div class="feat-rows">
+      <div class="feat-row">
+        <div class="feat-row-num">01</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">✍️</span> Two Post Variants</div>
+          <div class="feat-row-desc">Variant A is an educational deep-dive written for fellow engineers. Variant B is a career story written for recruiters and founders. Switch between them or view side-by-side.</div>
+        </div>
+        <span class="feat-chip chip-b">Core</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">02</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">📅</span> Schedule Planner</div>
+          <div class="feat-row-desc">Per-audience posting heatmaps return the top 3 optimal windows with real calendar dates in your local timezone — not vague "Tuesday morning" advice.</div>
+        </div>
+        <span class="feat-chip chip-g">Algorithm</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">03</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">🔥</span> Trending Topic Radar</div>
+          <div class="feat-row-desc">Scans your draft live against 8 LinkedIn trending categories (AI/ML, Full-Stack, DevOps, Career, Open Source, Data Science, Security, Productivity). Updates with 500ms debounce as you type.</div>
+        </div>
+        <span class="feat-chip chip-r">Live</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">04</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">🎠</span> Auto-Carousel PDF Export</div>
+          <div class="feat-row-desc">Detects markdown tables and lists (4+ items) in your draft and converts them into a styled multi-slide PDF. LinkedIn renders PDFs as swipeable carousels — typically 3× more impressions than plain posts.</div>
+        </div>
+        <span class="feat-chip chip-a">jsPDF</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">05</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">📊</span> Dynamic Analytics</div>
+          <div class="feat-row-desc">Every copied post is tracked locally. The analytics dashboard shows avg score, best angle, and optimal hashtag count. The hashtag rule auto-recalibrates for the next run — a self-improving system.</div>
+        </div>
+        <span class="feat-chip chip-v">Foundry IQ</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">06</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">🖼️</span> Image Processing &amp; Alt-Text</div>
+          <div class="feat-row-desc">Drag-and-drop up to 8 images. The agent generates descriptive alt-text and ensures the hook references the attached visual. Images embed into carousel PDF slides with editable captions.</div>
+        </div>
+        <span class="feat-chip chip-c">Visual</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">07</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">✅</span> Pre-Publish Checklist</div>
+          <div class="feat-row-desc">7-point pass/warn/fail per variant: hook length under 210 chars, metric/claim presence, max 2 sentences per paragraph, hashtag count and placement, @mention, CTA question, and word count 150–300.</div>
+        </div>
+        <span class="feat-chip chip-g">7 Rules</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">08</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">📬</span> First Comment Generation</div>
+          <div class="feat-row-desc">A 50–80 word follow-up comment with 2–3 bonus hashtags — paste it immediately after publishing to seed engagement velocity in the first 60 minutes, which LinkedIn's algorithm weights most.</div>
+        </div>
+        <span class="feat-chip chip-a">Engagement</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">09</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">@</span> @Mention Detection</div>
+          <div class="feat-row-desc">Maps tools and companies in your draft to 19 verified LinkedIn company page handles. Tagging an entity notifies their social team — organically expanding reach 3–5× when they engage or reshare.</div>
+        </div>
+        <span class="feat-chip chip-c">19 Pages</span>
+      </div>
+      <div class="feat-row">
+        <div class="feat-row-num">10</div>
+        <div class="feat-row-body">
+          <div class="feat-row-title"><span class="ficon">👁️</span> Hook Preview</div>
+          <div class="feat-row-desc">Shows exactly the first 210 characters — what LinkedIn readers see before "See more." Optimize your click-through before you post.</div>
+        </div>
+        <span class="feat-chip chip-b">210 chars</span>
+      </div>
+    </div>
+
+    <hr class="rule" />
+
+    <!-- ── 10-STEP REASONING ─────────────────────────────── -->
+    <div class="oversize-label">Agent Brain</div>
+    <h2 class="sec-h2">The reasoning chain</h2>
+    <p class="sec-p">All 10 steps fire inside a single GROQ API call. The full log is shown to you so the agent's thinking is never a black box.</p>
+
+    <div class="chain-outer" role="region" aria-label="10-step reasoning chain">
+      <div class="chain-track">
+        <div class="chain-node">
+          <div class="chain-n">01</div>
+          <div class="chain-name">Extract</div>
+          <div class="chain-desc">Technology, achievement, key metric, audience, and pain point from your raw draft.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">02</div>
+          <div class="chain-name">Hook Gen</div>
+          <div class="chain-desc">Two hooks — educational "Here's exactly how I…" and career "I almost quit. Then…" Both fit inside the 210-char cutoff.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">03</div>
+          <div class="chain-name">Format</div>
+          <div class="chain-desc">Max 2 sentences per paragraph, aggressive line breaks. Mobile dwell time increases 40% with whitespace.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">04</div>
+          <div class="chain-name">Hashtags</div>
+          <div class="chain-desc">Picks N tags from a curated high-follower pool. N is dynamically set by your analytics history.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">05</div>
+          <div class="chain-name">Mentions</div>
+          <div class="chain-desc">Scans draft against 19 known LinkedIn page handles. Tagged entities expand reach 3–5× organically.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">06</div>
+          <div class="chain-name">CTA</div>
+          <div class="chain-desc">Appends a direct question. Comments signal "meaningful conversation" to the feed algorithm.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">07</div>
+          <div class="chain-name">Comment</div>
+          <div class="chain-desc">Writes the first comment (50–80 words) with 2–3 bonus hashtags not used in the main post.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">08</div>
+          <div class="chain-name">Checklist</div>
+          <div class="chain-desc">7-rule pass/warn/fail evaluation. Hook, structure, hashtags, mention, CTA, word count.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">09</div>
+          <div class="chain-name">Carousel</div>
+          <div class="chain-desc">Detects tables and lists ≥4 items. Extracts them for the PDF carousel export.</div>
+        </div>
+        <div class="chain-node">
+          <div class="chain-n">10</div>
+          <div class="chain-name">Score</div>
+          <div class="chain-desc">0–100 weighted: Hook 30 · Structure 20 · Hashtags 15 · CTA 15 · Mention 10 · Length 10.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="rule" />
+
+    <!-- ── FOUNDRY IQ ────────────────────────────────────── -->
+    <div class="oversize-label">Microsoft Foundry IQ</div>
+    <div class="iq-split">
+      <div class="iq-left">
+        <p class="iq-big-quote">The agent doesn't guess. It retrieves rules, <em>cites them</em>, and adjusts them based on what actually worked.</p>
+        <p class="iq-caption">
+          Foundry IQ is the knowledge retrieval layer that prevents hallucinated advice.
+          The agent's system prompt is built entirely from structured rules sourced from LinkedIn algorithm research —
+          with an explicit citation in every response.
+          The knowledge base is not static: it re-calibrates itself based on your real post performance history.
+        </p>
+      </div>
+      <div class="iq-right">
+        <div class="iq-phase">
+          <div class="iq-phase-num">01</div>
+          <div>
+            <div class="iq-phase-title">Knowledge Base</div>
+            <div class="iq-phase-desc"><code>rules.js</code> — structured LinkedIn algorithm rulebook covering hooks, structure, hashtags, mentions, and CTAs.</div>
+          </div>
+        </div>
+        <div class="iq-phase">
+          <div class="iq-phase-num">02</div>
+          <div>
+            <div class="iq-phase-title">Grounded Retrieval</div>
+            <div class="iq-phase-desc"><code>buildFoundryIQPrompt()</code> constructs the system prompt from retrieved rules — reducing hallucination, keeping output verifiable.</div>
+          </div>
+        </div>
+        <div class="iq-phase">
+          <div class="iq-phase-num">03</div>
+          <div>
+            <div class="iq-phase-title">Dynamic Updating</div>
+            <div class="iq-phase-desc"><code>updateRulesFromAnalytics()</code> re-calibrates the hashtag rule based on your post performance. The knowledge base learns.</div>
+          </div>
+        </div>
+        <div class="iq-phase">
+          <div class="iq-phase-num">04</div>
+          <div>
+            <div class="iq-phase-title">Cited Response</div>
+            <div class="iq-phase-desc">Every agent response includes <code>iq_citation</code> — a sourced reference to the rule version used. No untraceable output.</div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="rule" />
+
+    <!-- ── TECH STACK ────────────────────────────────────── -->
+    <div class="oversize-label">Technology</div>
+    <h2 class="sec-h2">Built with</h2>
+
+    <div class="bento">
+      <div class="bento-cell span2">
+        <div class="bento-icon">🧠</div>
+        <div class="bento-name">GROQ · LLaMA 3.3 70B Versatile</div>
+        <div class="bento-role">The reasoning engine. Single API call handles all 10 steps, returning structured JSON. Fastest inference available for a 70B parameter model.</div>
+        <div class="bento-dot" style="background:var(--accent)"></div>
+      </div>
+      <div class="bento-cell">
+        <div class="bento-icon">⚡</div>
+        <div class="bento-name">Microsoft Foundry IQ</div>
+        <div class="bento-role">Grounded knowledge retrieval layer. Rules-based prompting with citations and dynamic self-calibration.</div>
+        <div class="bento-dot" style="background:var(--violet)"></div>
+      </div>
+      <div class="bento-cell">
+        <div class="bento-icon">📄</div>
+        <div class="bento-name">jsPDF 2.5.1</div>
+        <div class="bento-role">Carousel PDF generation. Multi-slide, styled output with embedded user images and captions.</div>
+        <div class="bento-dot" style="background:var(--amber)"></div>
+      </div>
+      <div class="bento-cell">
+        <div class="bento-icon">🌐</div>
+        <div class="bento-name">Vercel Serverless</div>
+        <div class="bento-role"><code>api/env.js</code> injects the GROQ key from environment variables at request time — never in source code.</div>
+        <div class="bento-dot" style="background:var(--red)"></div>
+      </div>
+      <div class="bento-cell span2">
+        <div class="bento-icon">🟨</div>
+        <div class="bento-name">Vanilla JavaScript ES Modules</div>
+        <div class="bento-role">Zero framework, zero bundler, zero npm install in production. Every file has a single responsibility and imports only what it needs.</div>
+        <div class="bento-dot" style="background:var(--green)"></div>
+      </div>
+      <div class="bento-cell">
+        <div class="bento-icon">💾</div>
+        <div class="bento-name">localStorage</div>
+        <div class="bento-role">Analytics history stored on-device only. No server, no third-party tracker, no account required.</div>
+        <div class="bento-dot" style="background:var(--cyan)"></div>
+      </div>
+    </div>
+
+    <hr class="rule" />
+
+    <!-- ── SECURITY ──────────────────────────────────────── -->
+    <div class="oversize-label">Security</div>
+    <h2 class="sec-h2">How it stays safe</h2>
+
+    <div class="sec-timeline">
+      <div class="sec-entry">
+        <div class="sec-dot-col"><div class="sec-dot">🔒</div></div>
+        <div class="sec-body">
+          <div class="sec-title">API key never in source code</div>
+          <div class="sec-detail"><code>config.js</code> is gitignored. On Vercel, the key lives in environment variables and is injected by a serverless function — not visible in any committed file or browser network tab that shows source.</div>
+        </div>
+      </div>
+      <div class="sec-entry">
+        <div class="sec-dot-col"><div class="sec-dot">🛡️</div></div>
+        <div class="sec-body">
+          <div class="sec-title">XSS protection on all user content</div>
+          <div class="sec-detail">Every piece of user input rendered to the DOM passes through <code>escHtml()</code>. Malicious draft content cannot inject scripts.</div>
+        </div>
+      </div>
+      <div class="sec-entry">
+        <div class="sec-dot-col"><div class="sec-dot">🔐</div></div>
+        <div class="sec-body">
+          <div class="sec-title">No data leaves your browser except the GROQ call</div>
+          <div class="sec-detail">No backend, no database, no analytics service. The only outbound request is the GROQ API call. Everything else — analytics, images, history — stays in <code>localStorage</code> on your device.</div>
+        </div>
+      </div>
+      <div class="sec-entry">
+        <div class="sec-dot-col"><div class="sec-dot">🧹</div></div>
+        <div class="sec-body">
+          <div class="sec-title">JSON sanitizer prevents crashes</div>
+          <div class="sec-detail"><code>sanitizeJsonString()</code> repairs malformed JSON from the LLM before parsing — handling unescaped control characters and bad newlines that would crash a naive <code>JSON.parse</code>.</div>
+        </div>
+      </div>
+    </div>
+
+    <hr class="rule" />
+
+    <!-- ── HACKATHON ─────────────────────────────────────── -->
+    <div class="oversize-label">Hackathon</div>
+    <h2 class="sec-h2">Agents League 2026</h2>
+
+    <div class="hk-banner">
+      <div class="hk-trophy">🏆</div>
+      <div class="hk-body">
+        <div class="hk-title">Microsoft Agents League Hackathon 2026 — Reasoning Agents Track</div>
+        <div class="hk-meta">
+          Built and submitted between June 4–14, 2026. LinkedAgent was designed specifically around
+          the judging criteria — multi-step reasoning with a transparent log, Foundry IQ grounded knowledge,
+          a self-updating rule engine, and a polished end-to-end UX.
+        </div>
+        <div class="hk-tags">
+          <span class="hk-tag">⚡ Microsoft Foundry IQ</span>
+          <span class="hk-tag">🧠 Reasoning Agents Track</span>
+          <span class="hk-tag">📅 June 4–14, 2026</span>
+          <span class="hk-tag">🎯 Winners: June 30, 2026</span>
+        </div>
+      </div>
+      
+    </div>
+
+    <div class="closing-strip">
+      <p>"LinkedAgent knows <em>why</em> it makes every decision, cites its rules, and improves itself based on what's worked before."</p>
+    </div>
+
+  </main>
+
+  <!-- ── FOOTER ───────────────────────────────────────────── -->
+  <footer class="footer">
+    <div class="footer-inner">
+      <div class="footer-logo">
+        <span class="nav-name">Linked<span class="nav-accent">Agent</span></span>
+      </div>
+      <div class="footer-links">
+        <span>Built for</span>
+        <span class="footer-tag">🏆 Agents League Hackathon 2026</span>
+        <span class="footer-tag">⚡ Microsoft Foundry IQ</span>
+        <span class="footer-tag">🧠 Reasoning Agents Track</span>
+      </div>
+      <p class="footer-copy">Submission deadline: June 14, 2026 · Winners announced June 30, 2026</p>
+    </div>
+  </footer>
+
+</body>
+</html>
